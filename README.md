@@ -1,10 +1,10 @@
-# WGANvsDCGAN
+# WGANvsDCGAN  ⚔️🤖
 
 DCGANs (Deep Convolutional Adversarial Networks) are a widely studied architeture in the field of generative adversarial networks. They are known for their ability to generate realistic synthetic data. However, one of the main challenges with DCGANs is their instability during training, often resulting in issues such as mode collapse, where the generator produces limited varities of outputs, or the inability of the generator and discriminator to reach a state equilibrium.
 
 To mitigate these challenges, the Wasserstein GAN (WGAN) was introduced, and later improved with techniques such as gradient penalty and spectral normalization of the weight tensors. These changes aims to provide more stability during the training process of the network.
 
-## DCGAN Architeture
+## DCGAN Architeture 🛠️
 
 The architeture of a DCGAN is typically composed of a generator and a discriminator, with the generator using de-convolutional layers, and the discriminator using convolutional layers. The generator maps a random noise vector sampled from a latent gaussian distribution to a synthetic image, while the discriminator is trained to classify whether the generated image is real or not.
 
@@ -14,7 +14,7 @@ $\[ \min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{data}(x)}[\log D(x)] + \mathbb
 
 However, the loss function in this formulation does not correlate with the quality of generated samples, while their objective is to classify the images as real or generated.
 
-## WGAN
+## WGAN 🚀
 
 The WGAN architeture introduces the Wasserstein distance (also known as Earth Mover's distance) as a measure of distance between the real data distribution $\(p_{data}\)$ and the generated data distribution $\(p_g\)$. This distance is defined as:
 
@@ -24,11 +24,11 @@ $\[ W(p_{data}, p_g) = \inf_{\gamma \in \Pi(p_{data}, p_g)} \mathbb{E}_{(x, y) \
 Where $\( \Pi(p_{data}, p_g) \)$ denotes the set of all joint distributions whose marginals are $\( p_{data} \)$ and $\( p_g \)$. 
 Since the Wasserstein distance is a direct measure of the distance between the distribution of real and fake data, the loss will be able to also judge the quality of generated samples by measuring their distributions compared to the real ones, giving a more meaningful loss function.
 
-## Gradient Penalty 
+## Gradient Penalty ⚖️
 
 The wasserstein distance needs a 1-Lipschitz continuity condition in the compared distributions. To ensure this condition, we can use gradient penalty. The goal of the gradient penalty is to regularize the norm of the gradients of the discriminator with respect to its inputs, pushing it towards 1.
 
-### Detailed Computation of the Gradient Penalty
+### Detailed Computation of the Gradient Penalty 🧮
 
 To compute the norm used in the gradient penalty, a random tensor $\( \epsilon \)$ is sampled from a uniform distribution in the range $\( ]0, 1[ \)$. This tensor $\( \epsilon \)$ serves as a mixing coefficient to interpolate between real and generated samples.
 
@@ -54,10 +54,39 @@ $\[ \lambda \mathbb{E}_{\hat{x} \sim p_{\hat{x}}} [(\|\nabla_{\hat{x}} D(\hat{x}
 
 This penalty encourages the gradient norm to stay close to 1, which helps to stabilize the training process by preventing issues like gradient explosion or vanishing gradients. 
 
-## Spectral Normalization
+## Spectral Normalization 🎚️
 
 Spectral normalization is another technique used to ensure the Lipschitz continuity of the discriminator. It involves normalizing the weights of each layer in the discriminator by their largest singular value. Mathematically, this can be represented as:
 
 $\[ \hat{W} = \frac{W}{\sigma(W)} \]$
 
 where $\( W \)$ is the weight matrix, and $\( \sigma(W) \)$ is its largest singular value. This normalization limits the maximum gradient value that can be backpropagated, further stabilizing the training process.
+
+## Results 📊
+Both models were implemented using the same base architecture, running on similar hardware and datasets. The training process spanned 10 epochs for both the DCGAN and WGAN.
+
+DCGAN Performance
+During the final epoch of the DCGAN, the loss per iteration was as follows:
+
+![alt text](dcganloss.png)
+
+The plot reveals notable instability in the training process, particularly in the generator loss on real data. This is evidenced by sharp peaks scattered throughout the plot, indicating moments of significant volatility in the learning process.
+
+Despite these fluctuations, the DCGAN managed to produce the following images in the last epoch:
+
+![alt text](generateddc.png)
+
+WGAN Performance
+For the WGAN, we analyzed the Wasserstein distances per iteration:
+
+![alt text](wdistances.png)
+
+The Wasserstein distance, which serves as the loss function in WGANs, showed a much more stable profile during training. While the initial stages of training saw a rapid spike in this value—likely due to the effects of spectral normalization on the first weights—the model quickly stabilized. This early instability can be attributed to the larger norms of the weights during the initial learning of edge biases. However, once these weights stabilized, the Wasserstein distance remained consistent across iterations, reflecting a more controlled training process for both the generator and discriminator.
+
+But this stability comes with a tradeoff. The iteration time for each epoch was around 120s for each epoch, while this same time was around 40s in the DCGAN.
+
+Here are the images generated by the WGAN at the last epoch:
+
+![alt text](wgangen.png)
+
+For further implementation details, refer to the notebooks in this repository
